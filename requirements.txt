@@ -1,0 +1,5 @@
+textual
+redis
+rich
+python-dotenv
+elasticsearch<8
