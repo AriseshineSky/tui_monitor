@@ -31,7 +31,6 @@ class IndexMonitor(Static):
                 continue
 
             line = sparkline(counts)
-            total = sum(counts)
             now_speed = counts[-1]
 
             if len(counts) > 1:
@@ -49,7 +48,6 @@ class IndexMonitor(Static):
 
             lines.append(
                 f"[b]{name.upper():<12}[/b] {line}  "
-                f"now:{now_speed}/h  {trend}  total:{total}"
             )
             lines.append(f"{'':12} {hourly_str}")
             lines.append("")  # 空行分隔

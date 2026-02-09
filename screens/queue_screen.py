@@ -30,9 +30,13 @@ class QueueScreen(Screen):
         yield Vertical(
             HeaderBar(),
             Horizontal(
-                VerticalScroll(self.queue_monitor, id="queue_scroll"),
-                VerticalScroll(self.monitor, id="monitor_scroll"),
-                VerticalScroll(self.task_stats_monitor, id="task_stats_monitor"),
+                # VerticalScroll(self.queue_monitor, id="queue_scroll"),
+                VerticalScroll(
+                    VerticalScroll(self.monitor, id="monitor_scroll"),
+                ),
+                VerticalScroll(
+                    VerticalScroll(self.task_stats_monitor, id="task_stats_monitor")
+                )
             )
         )
 
@@ -57,7 +61,7 @@ class QueueScreen(Screen):
                 if not index.startswith("task_stats_"):
                     continue
 
-                hourly_stats = self.es_service.get_hourly_task_stats(index)
+                hourly_stats = self.es_service.get_hourly_task_stats(index, 3)
                 all_stats.update(hourly_stats)
 
                 with open("task_stats_debug.log", "a") as f:
@@ -82,7 +86,7 @@ class QueueScreen(Screen):
         stats = {}
         for name, index in ES_MONITORS.items():
             try:
-                data = self.es_service.get_hourly_doc_count(index, 5)
+                data = self.es_service.get_hourly_doc_count(index, 3)
                 stats[name] = data
             except Exception:
                 stats[name] = [0]

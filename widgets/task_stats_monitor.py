@@ -19,7 +19,6 @@ class TaskStatsMonitor(Static):
 
             # sparkline 显示 num_asins
             line = sparkline(counts)
-            total = sum(counts)
             now_speed = counts[-1] if counts else 0
 
             # 计算趋势 ↑ ↓ →
@@ -40,7 +39,6 @@ class TaskStatsMonitor(Static):
             # 拼接显示内容
             lines.append(
                 f"[b]{worker} | {marketplace:<6}[/b] {line}  "
-                f"now:{now_speed}/h  {trend}  total:{total}"
             )
             lines.append(f"{'':20} {hourly_str}")
 
