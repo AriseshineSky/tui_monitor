@@ -2,6 +2,7 @@ from textual.screen import Screen
 from textual.containers import VerticalScroll, Vertical, Horizontal
 from textual.widgets import Static
 import asyncio
+from datetime import datetime
 
 from widgets.header import HeaderBar
 from widgets.index_monitor import IndexMonitor
@@ -10,7 +11,7 @@ from widgets.queue_monitor import QueueMonitor
 
 from services.redis_service import RedisService
 from services.es_service import EsService
-from core.config import REDIS_URL, ES_MONITORS
+from core.config import REDIS_URL, ES_MONITORS, ES_INDEXES
 from core.state import state
 
 
@@ -43,28 +44,32 @@ class QueueScreen(Screen):
 
         await self.refresh_hourly_docs()
         await self.refresh_queues()
+        await self.refresh_task_stats()
 
     async def refresh_task_stats(self):
-        stats = {}
-        for name, index in ES_MONITORS.items():
-            if not index.startswith("task_stats_"):
-                continue
-            try:
-                data = self.es_service.get_hourly_doc_count(index, hours=1)  # [(minute, doc_count), ...]
-                
-                display_data = []
-                for minute_str, doc_count in data:
-                    # 假设我们能获取成功/失败数量，这里用 0 占位
-                    successful_asins = 0
-                    failed_asins = 0
-                    display_data.append(f"{index} {minute_str}: {doc_count} docs (success={successful_asins}, failed={failed_asins})")
+        try:
+            all_stats = {}
 
-                stats[index] = display_data
+            for index in ES_INDEXES:
+                with open("task_stats_debug.log", "a") as f:
+                    f.write(f"{index}")
 
-            except Exception as e:
-                stats[index] = [f"Error: {str(e)}"]
+                if not index.startswith("task_stats_"):
+                    continue
 
-        self.task_stats_monitor.update_rows(stats)
+                hourly_stats = self.es_service.get_hourly_task_stats(index)
+                all_stats.update(hourly_stats)
+
+                with open("task_stats_debug.log", "a") as f:
+                    f.write(f"{datetime.now()} {index}: {hourly_stats}\n")
+
+            self.task_stats_monitor.update_rows(all_stats)
+
+        except Exception as e:
+            # 出错时显示占位信息
+            self.task_stats_monitor.update_rows({
+                "error|error": [{"num_asins": 0, "successful_asins": 0, "failed_asins": 0}]
+            })
 
     async def refresh_queues(self):
         if not self.redis:

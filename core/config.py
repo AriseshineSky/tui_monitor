@@ -10,7 +10,7 @@ ES_SCHEME = os.getenv("ES_SCHEME", "http")
 
 REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
 ES_INDEXES = os.getenv("ES_INDEXES", "").split(",")
-ES_INDEXES = [i.strip() for i in ES_INDEXES if i.strip()]
+ES_TASK_INDEXES = [i.strip() for i in ES_INDEXES if i.strip()]
 
 def parse_monitors(raw):
     result = {}
