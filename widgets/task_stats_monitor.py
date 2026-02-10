@@ -13,6 +13,16 @@ class TaskStatsMonitor(Static):
 
         for key, hour_list in hourly_stats.items():
             worker, marketplace = key.split("|")
+
+            avg_task_durations = [h["avg_task_duration_ms"] for h in hour_list]
+            avg_spapi_durations = [h["avg_spapi_duration_ms"] for h in hour_list]
+            avg_spapi_success = [h["avg_spapi_success_ms"] for h in hour_list]
+
+            # 拼接显示在行里
+            lines.append(f"{'':20} avg_task:  {' '.join(f'{v:4}' for v in avg_task_durations)}")
+            lines.append(f"{'':20} avg_spapi: {' '.join(f'{v:4}' for v in avg_spapi_durations)}")
+            lines.append(f"{'':20} avg_succ:  {' '.join(f'{v:4}' for v in avg_spapi_success)}")
+
             counts = [h["num_asins"] for h in hour_list]
             success_counts = [h["successful_asins"] for h in hour_list]
             fail_counts = [h["failed_asins"] for h in hour_list]
